@@ -1,7 +1,9 @@
 .pytest_cache
+.env
 dist
 __pycache__/
 *.py[cod]
 *.egg-info
 MUJOCO_LOG.TXT
 ;
+entrypoint-dev.sh

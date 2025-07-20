@@ -45,4 +45,8 @@ WORKDIR /app
 COPY . .
 RUN chown -R 1000:root .
 
-ENTRYPOINT ["sh", "entrypoint.sh"]
+ENTRYPOINT ["python", \
+            "dreamerv3/main.py", \ 
+            "--logdir", "dreamer/dmc_cartpole_balance", \
+            "--configs", "dmc_proprio", \ 
+            "--task", "dmc_cartpole_balance"]

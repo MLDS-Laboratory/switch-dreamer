@@ -82,6 +82,8 @@ class Agent(embodied.jax.Agent):
     scales.update({k: rec for k in dec_space})
     self.scales = scales
 
+    self.mvpi_lam = self.config.mvpi_lam
+
   @property
   def policy_keys(self):
     return '^(enc|dyn|dec|pol)/'
@@ -200,9 +202,14 @@ class Agent(embodied.jax.Agent):
     assert all(x.shape[:2] == (B * K, H + 1) for x in jax.tree.leaves(imgfeat))
     assert all(x.shape[:2] == (B * K, H + 1) for x in jax.tree.leaves(imgact))
     inp = self.feat2tensor(imgfeat)
+
+    rew = self.rew(inp, 2).pred()
+    y = jnp.mean(rew)
+    rew = rew - self.mvpi_lam * rew ** 2 + 2 * self.mvpi_lam * rew * y
+
     los, imgloss_out, mets = imag_loss(
         imgact,
-        self.rew(inp, 2).pred(),
+        rew,
         self.con(inp, 2).prob(1),
         self.pol(inp, 2),
         self.val(inp, 2),

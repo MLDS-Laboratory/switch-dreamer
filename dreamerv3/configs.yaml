@@ -117,6 +117,7 @@ defaults:
     repval_grad: True
     report: True
     report_gradnorms: False
+    beta: -0.001
 
 size05m: &size05m
   .*\.rssm: {deter: 256, hidden: 32, classes: 2}

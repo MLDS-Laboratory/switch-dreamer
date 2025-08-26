@@ -2,7 +2,7 @@ import functools
 
 import elements
 import embodied
-import gym
+import gymnasium as gym
 import numpy as np
 
 
@@ -19,6 +19,7 @@ class FromGym(embodied.Env):
     self._obs_key = obs_key
     self._act_key = act_key
     self._done = True
+    self._truncated = True
     self._info = None
 
   @property
@@ -57,13 +58,14 @@ class FromGym(embodied.Env):
   def step(self, action):
     if action['reset'] or self._done:
       self._done = False
-      obs = self._env.reset()
+      obs, self._info = self._env.reset()
       return self._obs(obs, 0.0, is_first=True)
     if self._act_dict:
       action = self._unflatten(action)
     else:
       action = action[self._act_key]
-    obs, reward, self._done, self._info = self._env.step(action)
+    obs, reward, self._done, self._truncated, self._info = self._env.step(action)
+    self._done = self._done or self._truncated
     return self._obs(
         obs, reward,
         is_last=bool(self._done),

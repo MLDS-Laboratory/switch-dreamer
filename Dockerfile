@@ -34,6 +34,10 @@ RUN apt-get update && apt-get install -y openjdk-8-jdk && apt-get clean
 RUN pip install https://github.com/danijar/minerl/releases/download/v0.4.4-patched/minerl_mirror-0.4.4-cp311-cp311-linux_x86_64.whl
 RUN chown -R 1000:root /venv/lib/python3.11/site-packages/minerl
 
+# Install NovGrid
+RUN git clone https://github.com/eilab-gt/NovGrid.git
+RUN cd NovGrid && pip install -e .
+
 # Requirements
 RUN pip install jax[cuda]==0.5.0
 COPY requirements.txt requirements.txt

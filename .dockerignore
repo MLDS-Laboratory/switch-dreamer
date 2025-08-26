@@ -2,6 +2,7 @@
 __pycache__/
 dist
 Dockerfile
+Dockerfile.dev
 ./logdir
 entrypoint.sh
 entrypoint-dev.sh

@@ -188,7 +188,7 @@ dmc_proprio:
   run: {steps: 1.1e6, train_ratio: 1024}
 
 gym:
-  <<: *size1m
+  <<: *size05m
   task: gym_CartPole-v1
   run: {steps: 1.1e6, train_ratio: 1024}
 

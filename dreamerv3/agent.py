@@ -204,7 +204,7 @@ class Agent(embodied.jax.Agent):
     inp = self.feat2tensor(imgfeat)
 
     rew = self.rew(inp, 2).pred()
-    y = jnp.mean(rew)
+    y = jnp.mean(rew, axis=0, keepdims=True)
     rew = rew - self.mvpi_lam * rew ** 2 + 2 * self.mvpi_lam * rew * y
 
     los, imgloss_out, mets = imag_loss(

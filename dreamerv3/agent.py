@@ -212,7 +212,7 @@ class Agent(embodied.jax.Agent):
         contdisc=self.config.contdisc,
         horizon=self.config.horizon,
         **self.config.imag_loss)
-    losses.update({k: v.mean(1).reshape((B, K)) for k, v in los.items()})
+    losses.update({k: (v.mean(1).reshape((B, K)) if k != 'gini' else v) for k, v in los.items()})
     metrics.update(mets)
 
     # Replay
@@ -238,6 +238,7 @@ class Agent(embodied.jax.Agent):
         sorted(losses.keys()), sorted(self.scales.keys()))
     metrics.update({f'loss/{k}': v.mean() for k, v in losses.items()})
     loss = sum([v.mean() * self.scales[k] for k, v in losses.items()])
+    
 
     carry = (enc_carry, dyn_carry, dec_carry)
     entries = (enc_entries, dyn_entries, dec_entries)
@@ -413,6 +414,23 @@ def imag_loss(
   policy_loss = sg(weight[:, :-1]) * -(
       logpi * sg(adv_normed) + actent * sum(ents.values()))
   losses['policy'] = policy_loss
+
+  sort_idx = jnp.argsort(ret[:, -1])
+  sort_ret = ret[:, -1][sort_idx]
+  sample_size = sort_ret.shape[0]
+  sum_log_pi = jnp.sum(logpi, axis=1)
+  sort_sum_log_pi = sum_log_pi[sort_idx]
+
+  # Compute integral CDF
+  diff = sort_ret[1:] - sort_ret[:-1]
+  x = jnp.linspace(1., sample_size - 1, sample_size - 1)
+  x = x / sample_size
+  diff = diff * x
+  cumsum_diff = diff + jnp.sum(diff) - jnp.cumsum(diff, axis=-1)
+  coef = 2. * cumsum_diff + sort_ret[:-1] - sort_ret[-1]
+
+  gini_loss = -1 * sort_sum_log_pi[:-1] * sg(coef)
+  losses['gini'] = gini_loss
 
   voffset, vscale = valnorm(ret, update)
   tar_normed = (ret - voffset) / vscale

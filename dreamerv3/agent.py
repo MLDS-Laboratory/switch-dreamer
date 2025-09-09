@@ -415,10 +415,10 @@ def imag_loss(
       logpi * sg(adv_normed) + actent * sum(ents.values()))
   losses['policy'] = policy_loss
 
-  sort_idx = jnp.argsort(ret[:, -1])
-  sort_ret = ret[:, -1][sort_idx]
+  sort_idx = jnp.argsort(ret[:, 0])
+  sort_ret = ret[:, 0][sort_idx]
   sample_size = sort_ret.shape[0]
-  sum_log_pi = jnp.sum(logpi, axis=1)
+  sum_log_pi = jnp.sum(sg(weight[:, :-1]) * logpi, axis=1)
   sort_sum_log_pi = sum_log_pi[sort_idx]
 
   # Compute integral CDF
@@ -430,7 +430,7 @@ def imag_loss(
   coef = 2. * cumsum_diff + sort_ret[:-1] - sort_ret[-1]
 
   gini_loss = -1 * sort_sum_log_pi[:-1] * sg(coef)
-  losses['gini'] = gini_loss
+  losses['gini'] = gini_loss / ((sample_size - 1) * ret.shape[1])
 
   voffset, vscale = valnorm(ret, update)
   tar_normed = (ret - voffset) / vscale

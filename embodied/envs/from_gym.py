@@ -41,26 +41,26 @@ class RiskySwimmerEnv(SwimmerEnv):
         super().__init__(**kwargs)
 
     def step(self, action):
-        obs, reward, terminated, truncated, info = super().step(action)
+        obs, reward, done, truncated, info = super().step(action)
         x_position = info['x_position']
         violation = x_position > 0.5
         if violation:
             reward += 10.0 * np.random.randn()
         info['is_violation'] = violation
-        return obs, reward, terminated, truncated, info
+        return obs, reward, done, truncated, info
     
 class RiskyHalfCheetahEnv(HalfCheetahEnv):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
     def step(self, action):
-        obs, reward, terminated, truncated, info = super().step(action)
+        obs, reward, done, truncated, info = super().step(action)
         x_position = info['x_position']
         violation = x_position < -3
         if violation:
             reward += 10.0 * np.random.randn()
         info['is_violation'] = violation
-        return obs, reward, terminated, truncated, info
+        return obs, reward, done, truncated, info
     
 register(
     id="RiskyCartPole-v0",

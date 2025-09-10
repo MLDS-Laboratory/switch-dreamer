@@ -6,6 +6,30 @@ import gymnasium as gym
 import numpy as np
 
 
+import numpy as np
+from gymnasium.envs.registration import register
+from gymnasium.envs.classic_control.cartpole import CartPoleEnv
+
+class RiskyCartPoleEnv(CartPoleEnv):
+    def __init__(self):
+        super().__init__()
+
+    def step(self, action):
+        obs, reward, done, truncated, info = super().step(action)
+        x_position = obs[0]
+        violation = x_position > 0.01
+        if violation:
+            reward += 10.0 * np.random.randn()
+        info['is_violation'] = violation
+        return obs, reward, done, truncated, info
+    
+register(
+    id="RiskyCartPole-v0",
+    entry_point=RiskyCartPoleEnv,
+    max_episode_steps=200
+)
+
+
 class FromGym(embodied.Env):
 
   def __init__(self, env, obs_key='image', act_key='action', **kwargs):
@@ -43,6 +67,7 @@ class FromGym(embodied.Env):
         'is_first': elements.Space(bool),
         'is_last': elements.Space(bool),
         'is_terminal': elements.Space(bool),
+        'log/is_violation': elements.Space(bool)
     }
 
   @functools.cached_property
@@ -69,10 +94,11 @@ class FromGym(embodied.Env):
     return self._obs(
         obs, reward,
         is_last=bool(self._done),
-        is_terminal=bool(self._info.get('is_terminal', self._done)))
+        is_terminal=bool(self._info.get('is_terminal', self._done)),
+        is_violation=bool(self._info.get('is_violation', False)))
 
   def _obs(
-      self, obs, reward, is_first=False, is_last=False, is_terminal=False):
+      self, obs, reward, is_first=False, is_last=False, is_terminal=False, is_violation=False):
     if not self._obs_dict:
       obs = {self._obs_key: obs}
     obs = self._flatten(obs)
@@ -82,6 +108,7 @@ class FromGym(embodied.Env):
         is_first=is_first,
         is_last=is_last,
         is_terminal=is_terminal)
+    obs.update({'log/is_violation': is_violation})
     return obs
 
   def render(self):

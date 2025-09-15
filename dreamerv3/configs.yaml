@@ -50,7 +50,7 @@ defaults:
     steps: 1e10
     duration: 0
     train_ratio: 32.0
-    log_every: 120
+    log_every: 300
     report_every: 300
     save_every: 900
     envs: 16

@@ -68,15 +68,18 @@ register(
 )
 register(
     id="RiskySwimmer-v0",
-    entry_point=RiskySwimmerEnv
+    entry_point=RiskySwimmerEnv,
+    max_episode_steps=1000
 )
 register(
     id="RiskyHalfCheetah-v0",
-    entry_point=RiskyHalfCheetahEnv
+    entry_point=RiskyHalfCheetahEnv,
+    max_episode_steps=1000
 )
 register(
     id="RiskyInvertedPendulum-v0",
-    entry_point=RiskyInvertedPendulumEnv
+    entry_point=RiskyInvertedPendulumEnv,
+    max_episode_steps=1000
 )
 
 class FromGym(embodied.Env):

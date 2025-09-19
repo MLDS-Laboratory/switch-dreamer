@@ -118,11 +118,6 @@ defaults:
     report: True
     report_gradnorms: False
 
-size05m: &size05m
-  .*\.rssm: {deter: 256, hidden: 32, classes: 2}
-  .*\.depth: 2
-  .*\.units: 32
-
 size1m: &size1m
   .*\.rssm: {deter: 512, hidden: 64, classes: 4}
   .*\.depth: 4

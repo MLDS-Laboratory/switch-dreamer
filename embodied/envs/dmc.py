@@ -6,9 +6,34 @@ import embodied
 import numpy as np
 from dm_control import manipulation
 from dm_control import suite
+from dm_control.suite import swimmer
+from dm_control.rl import control
 from dm_control.locomotion.examples import basic_rodent_2020
 
 from . import from_dm
+
+
+class RiskySwimmer(swimmer.Swimmer):
+    def get_reward(self, physics):
+        reward = super().get_reward(physics)
+        xpos = physics.data.qpos[0]
+        if xpos > 0.5:
+            reward += 10 * self.random_state.normal(loc=0, scale=1)
+        return reward
+    
+@swimmer.SUITE.add('benchmarking')
+def risky_swimmer(time_limit=swimmer._DEFAULT_TIME_LIMIT, control_timestep=swimmer._CONTROL_TIMESTEP, random=None, environment_kwargs=None):
+    model_string, assets = swimmer.get_model_and_assets(6)
+    physics = swimmer.Physics.from_xml_string(model_string, assets=assets)
+    task = RiskySwimmer(random=random)
+    environment_kwargs = environment_kwargs or {}
+    return control.Environment(
+      physics, 
+      task, 
+      time_limit=time_limit, 
+      control_timestep=control_timestep, 
+      **environment_kwargs
+    )
 
 
 class DMC(embodied.Env):
